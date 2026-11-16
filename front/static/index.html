@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sentinela · apoio à inspeção industrial</title>
+<style>
+:root{--bg:#121a1e;--panel:#16232a;--line:#26373f;--tx:#e9f0f2;--mut:#93a6ad;--ac:#6fd3b8;--wn:#f0a27a;--wnbg:#3b2a22;--okbg:#17322d}
+*{box-sizing:border-box}
+body{margin:0;background:#0d1114;color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,sans-serif;padding:28px}
+.app{max-width:1400px;margin:auto;background:var(--bg);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+header{display:flex;align-items:center;gap:16px;padding:22px 28px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:22px}header h1 span{color:var(--ac)}
+header small{display:block;color:var(--mut);font-size:13px;font-weight:400}
+.badge{border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px}
+nav{display:flex;gap:22px;padding:0 28px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:14px 0;font:inherit;cursor:pointer}
+nav button.on{color:var(--ac);border-color:var(--ac)}
+main{padding:28px}h2{margin:0 0 4px;font-size:26px}.sub{color:var(--mut);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:22px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}body{padding:10px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:22px}
+.card h3{margin:0 0 14px;font-size:16px}
+.ex{display:flex;gap:8px;align-items:center;color:var(--mut);font-size:13px;margin-bottom:14px}
+.ex button,.btn2{background:none;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+label{display:block;color:var(--mut);font-size:13px;margin-bottom:4px}
+input,select{width:100%;background:#0f1a1f;border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:11px 12px;font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.acts{display:flex;gap:10px;margin-top:18px}
+.btn{background:var(--ac);color:#0b2620;border:0;border-radius:8px;padding:11px 18px;cursor:pointer;font:inherit;font-weight:600}
+.btn2{padding:11px 16px}
+.note{color:var(--mut);font-size:12.5px;margin-top:10px}
+.res{border-radius:10px;padding:18px;margin-bottom:16px}
+.res.alerta{background:var(--wnbg)}.res.ok{background:var(--okbg)}
+.res small{font-weight:600}.res.alerta small{color:var(--wn)}.res.ok small{color:var(--ac)}
+.res h4{margin:4px 0 6px;font-size:20px}.res p{margin:0}
+.sc{display:flex;justify-content:space-between;color:var(--mut);font-size:13px}.sc b{color:var(--tx);font-weight:500}
+.bar{position:relative;height:7px;background:#2a3a41;border-radius:9px;margin:8px 0 6px}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--ac);border-radius:9px}
+.bar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--wn)}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.row b{font-weight:600}
+details{margin-top:14px;color:var(--mut);font-size:13.5px}summary{color:var(--ac);cursor:pointer;margin-bottom:8px}
+.ref{color:var(--wn);font-size:13px;margin-top:10px}
+.ch{position:relative;height:290px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi span{color:var(--mut);font-size:13px}.kpi b{display:block;font-size:26px;margin-top:2px}
+table.cm{border-collapse:collapse;width:100%;text-align:center}
+.cm td,.cm th{padding:12px;border:1px solid var(--line);font-weight:500}.cm th{color:var(--mut);font-size:13px}
+.cm td.hit{background:var(--okbg)}.cm td.miss{background:var(--wnbg)}
+footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>sentinela <span>/</span><small>Apoio à inspeção industrial</small></h1><span class="badge">Rascunho · AI4I sintético</span></header>
+<nav><button class="on" data-aba="analisar">Analisar condições</button><button data-aba="validacao">Validação do modelo</button></nav>
+
+<main id="analisar">
+<h2>Como estão as condições operacionais?</h2><p class="sub">Informe as medições e consulte a indicação de inspeção.</p>
+<div class="grid">
+ <div>
+  <div class="card"><h3>Condições de entrada</h3>
+   <div class="ex">Exemplos da validação <button id="exOk">Sem alerta</button><button id="exAl">Com alerta</button></div>
+   <div class="form">
+    <div><label for="type">Tipo de produto</label><select id="type"><option value="L">L · qualidade baixa</option><option value="M">M · qualidade média</option><option value="H">H · qualidade alta</option></select></div>
+    <div><label for="tool_wear">Desgaste da ferramenta · min</label><input id="tool_wear" inputmode="decimal" value="22"></div>
+    <div><label for="air_temp">Temperatura do ar · K</label><input id="air_temp" inputmode="decimal" value="301,9"></div>
+    <div><label for="process_temp">Temperatura do processo · K</label><input id="process_temp" inputmode="decimal" value="310,4"></div>
+    <div><label for="rpm">Rotação · rpm</label><input id="rpm" inputmode="decimal" value="1286"></div>
+    <div><label for="torque">Torque · Nm</label><input id="torque" inputmode="decimal" value="62,8"></div>
+   </div>
+   <div class="acts"><button class="btn" id="go">Analisar condições</button><button class="btn2" id="fix">Fixar como referência</button></div>
+   <p class="note" id="status">Preencha as medições e clique em analisar.</p>
+  </div>
+  <div class="card"><h3>Onde esta medição cai: rotação × torque</h3><div class="ch"><canvas id="cScatter"></canvas></div>
+   <p class="note">Curvas tracejadas: limites de potência (3.500 W e 9.000 W). Fora delas, a regra de falha por potência dispara.</p></div>
+ </div>
+ <div>
+  <div class="card"><h3>Indicação do modelo</h3>
+   <div class="res ok" id="res"><small id="rTag">RESULTADO ATUAL</small><h4 id="rTit">—</h4><p id="rTxt"></p></div>
+   <div class="sc"><span>Random Forest · sem pesos</span><b id="score">—</b></div>
+   <div class="bar"><i id="barI" style="width:0"></i><u id="barL"></u></div>
+   <p class="note" style="margin:0 0 6px">Score de classificação, sem calibração de probabilidade. A marca laranja é o limiar de alerta.</p>
+   <div class="row"><span>Diferença de temperatura</span><b id="iDt">—</b></div>
+   <div class="row"><span>Potência calculada</span><b id="iPw">—</b></div>
+   <div class="row"><span>Desgaste × torque</span><b id="iWt">—</b></div>
+   <p class="ref" id="refTxt"></p>
+   <details open><summary>O que este resultado significa?</summary>Classificação de condições associadas à falha no registro atual. Não estima tempo até a quebra. Os indicadores calculados são entradas do modelo; ainda não são uma explicação individual por SHAP.</details>
+  </div>
+  <div class="card"><h3>Proximidade dos limites físicos</h3><div class="ch"><canvas id="cProx"></canvas></div>
+   <p class="note">100% = limite da regra de falha (desgaste × torque do tipo, potência máxima, desgaste de 200 min).</p></div>
+ </div>
+</div>
+</main>
+
+<main id="validacao" class="hide">
+<h2>Quão confiável é o modelo?</h2><p class="sub">Resultados no conjunto de validação (2.000 linhas). O teste fica reservado para a avaliação final; como a validação também serviu para escolher o modelo, estes números não são uma estimativa final independente.</p>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+ <div class="card"><h3>Matriz de confusão</h3><table class="cm" id="cm"></table><p class="note">Só 68 falhas na validação: cada falha vale cerca de 1,5 ponto de recall. Leia com cautela.</p></div>
+ <div class="card"><h3>Curva precisão × recall</h3><div class="ch"><canvas id="cPR"></canvas></div></div>
+ <div class="card"><h3>Importância das variáveis</h3><div class="ch"><canvas id="cImp"></canvas></div></div>
+ <div class="card"><h3>Distribuição do score por classe</h3><div class="ch"><canvas id="cHist"></canvas></div></div>
+</div>
+</main>
+<footer>Demonstração com dados sintéticos. Alterar medições compara a resposta do modelo; não comprova o efeito de uma intervenção real.</footer>
+</div>
+
+<script src="chart.umd.js"></script>
+<script>
+const $=id=>document.getElementById(id), LIM={L:11000,M:12000,H:13000};
+const fmt=(n,d=0)=>n.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=id=>parseFloat($(id).value.replace(",","."));
+Chart.defaults.color="#93a6ad";Chart.defaults.borderColor="#26373f";Chart.defaults.font.family='"Segoe UI",system-ui,sans-serif';
+const AC="#6fd3b8",WN="#f0a27a",charts={};
+let M=null,ref=null,validOk=false;
+
+function ler(){return{type:$("type").value,tool_wear:num("tool_wear"),air_temp:num("air_temp"),process_temp:num("process_temp"),rpm:num("rpm"),torque:num("torque")}}
+function preencher(d){for(const k in d)$(k).value=typeof d[k]==="number"?String(d[k]).replace(".",","):d[k]}
+function chart(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart($(id),cfg)}
+
+async function analisar(){
+  const d=ler();
+  if(Object.values(d).some(v=>v!==v)){$("status").textContent="Confira os campos: todos precisam ser números.";return}
+  $("status").textContent="Analisando…";
+  try{
+    const r=await fetch("api/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+    if(!r.ok)throw new Error("Valores fora da faixa aceita (confira unidades em K, rpm, Nm e min).");
+    mostrar(d,await r.json());$("status").textContent="Resultado atualizado para as medições acima.";
+  }catch(e){$("status").textContent="Não foi possível analisar: "+e.message}
+}
+
+function mostrar(d,r){
+  window._ult={d,r};
+  const al=r.alerta;
+  $("res").className="res "+(al?"alerta":"ok");
+  $("rTit").textContent=al?"Condição associada à falha":"Sem alerta de falha";
+  $("rTxt").textContent=al?"Recomendada inspeção para avaliação técnica.":"O modelo não indica inspeção para estas medições.";
+  $("score").textContent="Score "+fmt(r.score,3);
+  $("barI").style.width=(r.score*100)+"%";$("barL").style.left=(r.limiar*100)+"%";
+  $("iDt").textContent=fmt(r.temp_diff,1)+" K";$("iPw").textContent=fmt(r.power_w)+" W";$("iWt").textContent=fmt(r.wear_x_torque)+" min·Nm";
+  $("refTxt").textContent=ref?`Referência fixada: score ${fmt(ref.r.score,3)} (${r.score>=ref.r.score?"+":"−"}${fmt(Math.abs(r.score-ref.r.score),3)} nesta análise).`:"";
+  graficos(d,r);
+}
+
+function graficos(d,r){
+  const curva=P=>{const o=[];for(let x=1100;x<=2900;x+=50)o.push({x,y:P*60/(2*Math.PI*x)});return o};
+  const am=M.amostra, pts=y=>am.filter(a=>a[2]===y).map(a=>({x:a[0],y:a[1]}));
+  const ds=[
+    {label:"Sem falha",data:pts(0),backgroundColor:"rgba(111,211,184,.35)",pointRadius:2.5},
+    {label:"Falha",data:pts(1),backgroundColor:"rgba(240,162,122,.9)",pointRadius:3.5},
+    {label:"3.500 W",data:curva(3500),showLine:true,borderColor:"#93a6ad",borderDash:[5,4],pointRadius:0,borderWidth:1.2},
+    {label:"9.000 W",data:curva(9000),showLine:true,borderColor:"#93a6ad",borderDash:[5,4],pointRadius:0,borderWidth:1.2}];
+  if(ref)ds.push({label:"Referência",data:[{x:ref.d.rpm,y:ref.d.torque}],backgroundColor:"#e9f0f2",pointStyle:"rectRot",pointRadius:8});
+  ds.push({label:"Atual",data:[{x:d.rpm,y:d.torque}],backgroundColor:"#fff",borderColor:AC,borderWidth:3,pointRadius:8});
+  chart("cScatter",{type:"scatter",data:{datasets:ds},options:{maintainAspectRatio:false,animation:false,
+    scales:{x:{min:1100,max:2900,title:{display:true,text:"Rotação (rpm)"}},y:{min:0,max:80,title:{display:true,text:"Torque (Nm)"}}},
+    plugins:{legend:{labels:{filter:i=>!i.text.includes(" W")}}}}});
+  const v=[["Desgaste × torque (OSF)",r.wear_x_torque/LIM[d.type]],["Potência máxima (PWF)",r.power_w/9000],["Desgaste da ferramenta (TWF)",d.tool_wear/200]].map(a=>[a[0],a[1]*100]);
+  chart("cProx",{type:"bar",data:{labels:v.map(a=>a[0]),datasets:[{data:v.map(a=>a[1]),backgroundColor:v.map(a=>a[1]>=100?WN:AC)}]},
+    options:{indexAxis:"y",maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw,0)+"% do limite"}}},
+    scales:{x:{min:0,suggestedMax:120,ticks:{callback:t=>t+"%"}}}}});
+}
+
+function validacao(){
+  if(validOk)return;validOk=true;
+  const k=[["PR-AUC",M.pr_auc],["Recall",M.recall],["Precisão",M.precisao],["F1",M.f1],["Limiar de alerta",M.limiar]];
+  $("kpis").innerHTML=k.map(a=>`<div class="kpi"><span>${a[0]}</span><b>${fmt(a[1],2)}</b></div>`).join("");
+  const c=M.matriz_confusao;
+  $("cm").innerHTML=`<tr><th></th><th>Previsto: sem falha</th><th>Previsto: falha</th></tr>
+   <tr><th>Real: sem falha</th><td class="hit">${c[0][0]}</td><td class="miss">${c[0][1]}</td></tr>
+   <tr><th>Real: falha</th><td class="miss">${c[1][0]}</td><td class="hit">${c[1][1]}</td></tr>`;
+  chart("cPR",{type:"line",data:{labels:M.curva_pr.recall.map(x=>fmt(x,2)),datasets:[{data:M.curva_pr.precisao,borderColor:AC,pointRadius:0,tension:.2}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:"Recall"}},y:{min:0,max:1,title:{display:true,text:"Precisão"}}}}});
+  const imp=Object.entries(M.importancias).sort((a,b)=>b[1]-a[1]);
+  chart("cImp",{type:"bar",data:{labels:imp.map(a=>a[0]),datasets:[{data:imp.map(a=>a[1]),backgroundColor:AC}]},
+    options:{indexAxis:"y",maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  const lb=M.hist_score.falha.map((_,i)=>fmt(i/20,2));
+  chart("cHist",{type:"bar",data:{labels:lb,datasets:[{label:"Sem falha",data:M.hist_score.sem_falha,backgroundColor:AC},{label:"Falha",data:M.hist_score.falha,backgroundColor:WN}]},
+    options:{maintainAspectRatio:false,scales:{y:{type:"logarithmic",title:{display:true,text:"Linhas (escala log)"}},x:{title:{display:true,text:"Score"}}}}});
+}
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  $("analisar").classList.toggle("hide",b.dataset.aba!=="analisar");$("validacao").classList.toggle("hide",b.dataset.aba!=="validacao");
+  if(b.dataset.aba==="validacao")validacao();
+});
+$("go").onclick=analisar;
+$("fix").onclick=()=>{if(window._ult){ref=window._ult;mostrar(ref.d,ref.r);$("refTxt").textContent="Referência fixada. Altere as medições e analise de novo para comparar.";$("status").textContent="Referência fixada."}};
+$("exOk").onclick=()=>{preencher(M.exemplos.sem_alerta);analisar()};
+$("exAl").onclick=()=>{preencher(M.exemplos.com_alerta);analisar()};
+fetch("api/metricas").then(r=>r.json()).then(m=>{M=m;analisar()}).catch(()=>{$("status").textContent="API fora do ar. Rode: uvicorn main:app"});
+</script>
+</body>
+</html>
