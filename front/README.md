@@ -5,7 +5,7 @@
    python -m venv .venv
    .venv\Scripts\activate        (Windows)   |   source .venv/bin/activate  (Linux/Mac)
    pip install -r requirements.txt
-2. Coloque o `ai4i2020.csv` nesta pasta (mesmo arquivo do notebook EDA).
+2. Garantir que o `ai4i2020.csv` esteja nesta pasta (mesmo arquivo do notebook EDA).
 3. Treine o modelo (gera modelo_rf.joblib e metricas.json):
    python treino.py
 4. Suba o servidor:
