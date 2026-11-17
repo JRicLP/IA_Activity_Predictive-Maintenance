@@ -1,0 +1,19 @@
+.venv/
+
+# Python caches and local tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Local configuration and operating-system files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# Artifacts accidentally generated at the repository root.
+# The application assets under front/ are required and remain tracked.
+/modelo_rf.joblib
+/metricas.json

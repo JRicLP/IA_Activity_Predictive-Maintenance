@@ -2,6 +2,8 @@
 Divisão 60/20/20, random_state=42. O CONJUNTO DE TESTE NÃO É USADO AQUI:
 todas as métricas, exemplos e gráficos vêm da VALIDAÇÃO."""
 import json, joblib
+from pathlib import Path
+
 import numpy as np, pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -9,7 +11,8 @@ from sklearn.metrics import (average_precision_score, precision_recall_curve,
                              confusion_matrix, f1_score, recall_score, precision_score)
 from features import montar_features, FEATURES
 
-df = pd.read_csv("ai4i2020.csv", encoding="utf-8-sig").rename(columns={
+csv_path = Path(__file__).resolve().parent / "ai4i2020.csv"
+df = pd.read_csv(csv_path, encoding="utf-8-sig").rename(columns={
     "Type": "type", "Air temperature [K]": "air_temp",
     "Process temperature [K]": "process_temp", "Rotational speed [rpm]": "rpm",
     "Torque [Nm]": "torque", "Tool wear [min]": "tool_wear", "Machine failure": "y"})
