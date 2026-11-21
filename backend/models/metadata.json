@@ -1,0 +1,63 @@
+{
+  "model_version": "ai4i-rf-v1",
+  "model": "RandomForestClassifier",
+  "threshold": 0.5,
+  "alert_rule": "model_score > threshold",
+  "target": "Machine failure",
+  "positive_class": 1,
+  "features": [
+    "air_temperature_k",
+    "process_temperature_k",
+    "rotational_speed_rpm",
+    "torque_nm",
+    "tool_wear_min",
+    "temp_diff",
+    "power_w",
+    "wear_x_torque",
+    "Type_H",
+    "Type_L",
+    "Type_M"
+  ],
+  "training_rows": 6000,
+  "training_failures": 203,
+  "training": {
+    "random_state": 42,
+    "n_estimators": 200,
+    "max_depth": 10,
+    "class_weight": null,
+    "resampling": null,
+    "split": "60/20/20 original"
+  },
+  "training_ranges": {
+    "air_temperature_k": [
+      295.3,
+      304.5
+    ],
+    "process_temperature_k": [
+      305.7,
+      313.8
+    ],
+    "rotational_speed_rpm": [
+      1168.0,
+      2886.0
+    ],
+    "torque_nm": [
+      3.8,
+      76.6
+    ],
+    "tool_wear_min": [
+      0.0,
+      253.0
+    ]
+  },
+  "versions": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.8.0"
+  },
+  "dataset_sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e",
+  "model_sha256": "c89ef64754d1e42dffa1763f447baeb83bf2fa64eece1b6d427e27c79aaa93a6"
+}
