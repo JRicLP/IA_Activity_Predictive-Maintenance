@@ -52,11 +52,11 @@
   },
   "versions": {
     "scikit-learn": "1.9.1",
-    "numpy": "2.5.4",
-    "pandas": "3.1.1",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
     "joblib": "1.6.0",
-    "scipy": "1.18.1",
-    "threadpoolctl": "3.8.0"
+    "scipy": "1.17.1",
+    "threadpoolctl": "3.7.0"
   },
   "dataset_sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e",
   "model_sha256": "c89ef64754d1e42dffa1763f447baeb83bf2fa64eece1b6d427e27c79aaa93a6"

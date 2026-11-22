@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>sentinela · apoio à inspeção industrial</title>
+<link rel="stylesheet" href="agente.css">
 <style>
 :root{--bg:#121a1e;--panel:#16232a;--line:#26373f;--tx:#e9f0f2;--mut:#93a6ad;--ac:#6fd3b8;--wn:#f0a27a;--wnbg:#3b2a22;--okbg:#17322d}
 *{box-sizing:border-box}
@@ -52,11 +53,24 @@ table.cm{border-collapse:collapse;width:100%;text-align:center}
 .cm td.hit{background:var(--okbg)}.cm td.miss{background:var(--wnbg)}
 footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
 .hide{display:none}
+/* percentual de falha */
+.pct{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:2px 0 14px}
+.pct span{color:var(--mut);font-size:13px}
+.pct b{font-size:40px;line-height:1;font-weight:600}
+.pct.ok b{color:var(--ac)}.pct.alerta b{color:var(--wn)}
+.faixa{color:var(--wn);font-size:13px;margin:10px 0 0}
+/* botão e painel do agente de IA (o conteúdo do chat fica em agente.js / agente.css) */
+.agente-btn{margin-left:auto}
+.agente{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.35);display:flex;flex-direction:column;z-index:20}
+.agente.hide{display:none}
+.agente-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.agente-top h3{margin:0;font-size:16px}
+#agente-root{flex:1;overflow:auto;padding:20px}
 </style>
 </head>
 <body>
 <div class="app">
-<header><h1>sentinela <span>/</span><small>Apoio à inspeção industrial</small></h1><span class="badge">Rascunho · AI4I sintético</span></header>
+<header><h1>sentinela <span>/</span><small>Apoio à inspeção industrial</small></h1><span class="badge">Rascunho · AI4I sintético</span><button class="btn2 agente-btn" id="btnAgente" type="button" aria-expanded="false" aria-controls="agente">Explicar com IA</button></header>
 <nav><button class="on" data-aba="analisar">Analisar condições</button><button data-aba="validacao">Validação do modelo</button></nav>
 
 <main id="analisar">
@@ -82,13 +96,15 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
  <div>
   <div class="card"><h3>Indicação do modelo</h3>
    <div class="res ok" id="res"><small id="rTag">RESULTADO ATUAL</small><h4 id="rTit">—</h4><p id="rTxt"></p></div>
+   <div class="pct ok" id="pctBox"><span>Percentual de falha estimado pelo modelo</span><b id="pct">—</b></div>
    <div class="sc"><span>Random Forest · sem pesos</span><b id="score">—</b></div>
    <div class="bar"><i id="barI" style="width:0"></i><u id="barL"></u></div>
-   <p class="note" style="margin:0 0 6px">Score de classificação, sem calibração de probabilidade. A marca laranja é o limiar de alerta.</p>
+   <p class="note" style="margin:0 0 6px">O percentual é o score da Random Forest (média das estimativas das árvores) na escala de 0 a 100 %. Não é uma probabilidade calibrada de quebra. A marca laranja é o limiar de alerta.</p>
    <div class="row"><span>Diferença de temperatura</span><b id="iDt">—</b></div>
    <div class="row"><span>Potência calculada</span><b id="iPw">—</b></div>
    <div class="row"><span>Desgaste × torque</span><b id="iWt">—</b></div>
    <p class="ref" id="refTxt"></p>
+   <p class="faixa" id="faixa"></p>
    <details open><summary>O que este resultado significa?</summary>Classificação de condições associadas à falha no registro atual. Não estima tempo até a quebra. Os indicadores calculados são entradas do modelo; ainda não são uma explicação individual por SHAP.</details>
   </div>
   <div class="card"><h3>Proximidade dos limites físicos</h3><div class="ch"><canvas id="cProx"></canvas></div>
@@ -110,13 +126,25 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
 <footer>Demonstração com dados sintéticos. Alterar medições compara a resposta do modelo; não comprova o efeito de uma intervenção real.</footer>
 </div>
 
+<aside id="agente" class="agente hide" role="dialog" aria-labelledby="agenteTitulo">
+  <div class="agente-top"><h3 id="agenteTitulo">Agente de explicabilidade</h3><button class="btn2" id="agenteFechar" type="button">Fechar</button></div>
+  <div id="agente-root"><p class="note">O agente de IA ainda não foi conectado.</p></div>
+</aside>
+
 <script src="chart.umd.js"></script>
+<script src="agente.js"></script>
 <script>
 const $=id=>document.getElementById(id), LIM={L:11000,M:12000,H:13000};
 const fmt=(n,d=0)=>n.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
 const num=id=>parseFloat($(id).value.replace(",","."));
 Chart.defaults.color="#93a6ad";Chart.defaults.borderColor="#26373f";Chart.defaults.font.family='"Segoe UI",system-ui,sans-serif';
 const AC="#6fd3b8",WN="#f0a27a",charts={};
+
+// Nomes internos do front -> nomes da API (POST /predict). Se a API mudar, mexa só aqui.
+const CAMPOS={type:"type",tool_wear:"tool_wear_min",air_temp:"air_temperature_k",process_temp:"process_temperature_k",rpm:"rotational_speed_rpm",torque:"torque_nm"};
+const ROTULO={air_temperature_k:"temperatura do ar",process_temperature_k:"temperatura do processo",rotational_speed_rpm:"rotação",torque_nm:"torque",tool_wear_min:"desgaste da ferramenta"};
+function paraApi(d){const o={};for(const k in CAMPOS)o[CAMPOS[k]]=d[k];return o}
+function deApi(a){const o={};for(const k in CAMPOS)o[k]=a[CAMPOS[k]];return o}
 let M=null,ref=null,validOk=false;
 
 function ler(){return{type:$("type").value,tool_wear:num("tool_wear"),air_temp:num("air_temp"),process_temp:num("process_temp"),rpm:num("rpm"),torque:num("torque")}}
@@ -128,9 +156,12 @@ async function analisar(){
   if(Object.values(d).some(v=>v!==v)){$("status").textContent="Confira os campos: todos precisam ser números.";return}
   $("status").textContent="Analisando…";
   try{
-    const r=await fetch("api/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+    const r=await fetch("predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(paraApi(d))});
     if(!r.ok)throw new Error("Valores fora da faixa aceita (confira unidades em K, rpm, Nm e min).");
-    mostrar(d,await r.json());$("status").textContent="Resultado atualizado para as medições acima.";
+    const j=await r.json();
+    // traduz a resposta da API para os nomes que o resto da tela já usa; "bruto" guarda a resposta original
+    mostrar(d,{score:j.model_score,alerta:j.inspection_recommended,limiar:j.threshold,temp_diff:j.temp_diff,power_w:j.power_w,wear_x_torque:j.wear_x_torque,fora_faixa:j.out_of_training_range,bruto:j});
+    $("status").textContent="Resultado atualizado para as medições acima.";
   }catch(e){$("status").textContent="Não foi possível analisar: "+e.message}
 }
 
@@ -141,6 +172,8 @@ function mostrar(d,r){
   $("rTit").textContent=al?"Condição associada à falha":"Sem alerta de falha";
   $("rTxt").textContent=al?"Recomendada inspeção para avaliação técnica.":"O modelo não indica inspeção para estas medições.";
   $("score").textContent="Score "+fmt(r.score,3);
+  $("pct").textContent=fmt(r.score*100,1)+" %";$("pctBox").className="pct "+(al?"alerta":"ok");
+  $("faixa").textContent=r.fora_faixa&&r.fora_faixa.length?"Atenção: "+r.fora_faixa.map(c=>ROTULO[c]||c).join(", ")+" fora da faixa vista no treino. Interprete o resultado com cautela.":"";
   $("barI").style.width=(r.score*100)+"%";$("barL").style.left=(r.limiar*100)+"%";
   $("iDt").textContent=fmt(r.temp_diff,1)+" K";$("iPw").textContent=fmt(r.power_w)+" W";$("iWt").textContent=fmt(r.wear_x_torque)+" min·Nm";
   $("refTxt").textContent=ref?`Referência fixada: score ${fmt(ref.r.score,3)} (${r.score>=ref.r.score?"+":"−"}${fmt(Math.abs(r.score-ref.r.score),3)} nesta análise).`:"";
@@ -191,9 +224,28 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
 });
 $("go").onclick=analisar;
 $("fix").onclick=()=>{if(window._ult){ref=window._ult;mostrar(ref.d,ref.r);$("refTxt").textContent="Referência fixada. Altere as medições e analise de novo para comparar.";$("status").textContent="Referência fixada."}};
-$("exOk").onclick=()=>{preencher(M.exemplos.sem_alerta);analisar()};
-$("exAl").onclick=()=>{preencher(M.exemplos.com_alerta);analisar()};
-fetch("api/metricas").then(r=>r.json()).then(m=>{M=m;analisar()}).catch(()=>{$("status").textContent="API fora do ar. Rode: uvicorn main:app"});
+$("exOk").onclick=()=>{preencher(deApi(M.exemplos.sem_alerta));analisar()};
+$("exAl").onclick=()=>{preencher(deApi(M.exemplos.com_alerta));analisar()};
+/* ---- Agente de IA: botão e painel ----
+   A lógica do agente fica em agente.js (função window.iniciarAgente), feito pelo colega.
+   Aqui só abrimos/fechamos o painel e entregamos o contexto da última análise. */
+function contextoAgente(){
+  const u=window._ult;
+  // entrada = corpo do POST /predict; resultado = resposta original da API
+  return u?{entrada:paraApi(u.d),resultado:u.r.bruto}:null;
+}
+let agenteIniciado=false;
+function abrirAgente(){
+  $("agente").classList.remove("hide");$("btnAgente").setAttribute("aria-expanded","true");
+  if(!agenteIniciado&&typeof window.iniciarAgente==="function"){agenteIniciado=true;window.iniciarAgente($("agente-root"),contextoAgente)}
+  $("agenteFechar").focus();
+}
+function fecharAgente(){$("agente").classList.add("hide");$("btnAgente").setAttribute("aria-expanded","false");$("btnAgente").focus()}
+$("btnAgente").onclick=()=>$("agente").classList.contains("hide")?abrirAgente():fecharAgente();
+$("agenteFechar").onclick=fecharAgente;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("agente").classList.contains("hide"))fecharAgente()});
+
+fetch("metricas").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(m=>{M=m;analisar()}).catch(()=>{$("status").textContent="Não foi possível carregar as métricas. Confirme que a API está no ar (uvicorn app:app) e que train_export.py já foi executado."});
 </script>
 </body>
 </html>
