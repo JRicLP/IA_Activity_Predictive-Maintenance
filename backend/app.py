@@ -9,6 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
+from evidence import build_evidence
+from explain import ExplainService
+from gemini_reports import (
+    GeminiProviderError,
+    GeminiRateLimitError,
+    GeminiReportService,
+    GeminiTimeoutError,
+    GeminiUnavailableError,
+)
 from predict import Predictor
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -40,9 +49,39 @@ class Prediction(BaseModel):
     wear_x_torque: float
 
 
+class Explanation(BaseModel):
+    model_version: str
+    model_score: float
+    threshold: float
+    positive_class: int
+    base_value: float | None
+    decomposition: float | None
+    decomposition_tolerance: float | None
+    contributions: list[dict]
+    out_of_training_range: list[str]
+    explanation_method: str
+    scale: str
+    global_importance: list[dict]
+
+
+class ExplainResponse(BaseModel):
+    prediction: dict
+    explanation: Explanation
+
+
+class ReportResponse(BaseModel):
+    report: dict
+    model_version: str
+    provider: Literal["gemini"] = "gemini"
+    evidence: dict
+    generated_at: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.predictor = Predictor()
+    app.state.explain = ExplainService(app.state.predictor)
+    app.state.reports = GeminiReportService()
     # metricas.json é gerado pelo train_export.py (métricas só da validação)
     app.state.metricas = (
         json.loads(METRICAS_PATH.read_text(encoding="utf-8")) if METRICAS_PATH.exists() else None
@@ -71,6 +110,53 @@ def health(request: Request):
 @app.post("/predict", response_model=Prediction)
 def predict(data: Measurements, request: Request):
     return request.app.state.predictor.predict(data.model_dump())
+
+
+@app.post("/explain", response_model=ExplainResponse)
+def explain(data: Measurements, request: Request):
+    prediction = request.app.state.predictor.predict(data.model_dump())
+    local = request.app.state.explain.explain_local(data.model_dump(), prediction)
+    global_result = request.app.state.explain.explain_global()
+    local["global_importance"] = global_result["features"]
+    try:
+        explained = Explanation.model_validate(local)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Explicador indisponivel.") from exc
+    return {"prediction": prediction, "explanation": explained}
+
+
+@app.post("/reports/generate", response_model=ReportResponse)
+def generate_report(data: Measurements, request: Request):
+    predictor = request.app.state.predictor
+    explain_service = request.app.state.explain
+    readings = data.model_dump()
+    prediction = predictor.predict(readings)
+    local = explain_service.explain_local(readings, prediction)
+    global_result = explain_service.explain_global()
+    local["global_importance"] = global_result["features"]
+    evidence = build_evidence(
+        readings,
+        prediction,
+        local,
+        request.app.state.metricas,
+    )
+    try:
+        report = request.app.state.reports.generate_report(evidence.model_dump())
+    except GeminiUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except GeminiRateLimitError as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+    except GeminiTimeoutError as exc:
+        raise HTTPException(status_code=504, detail=str(exc)) from exc
+    except GeminiProviderError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {
+        "report": report.model_dump(),
+        "model_version": prediction["model_version"],
+        "provider": "gemini",
+        "evidence": evidence.model_dump(),
+        "generated_at": evidence.generated_at,
+    }
 
 
 @app.get("/metricas")

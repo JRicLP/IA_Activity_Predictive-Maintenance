@@ -1,4 +1,4 @@
-.venv/
+.venv*/
 
 # Python caches and local tooling
 __pycache__/
@@ -11,11 +11,14 @@ __pycache__/
 .coverage.*
 htmlcov/
 .vscode/
+**/.cache/
+**/.dash/
 
 # Local configuration and operating-system files
-.env
-.env.*
+.env*
 !.env.example
+!.envExample
+*.local
 .DS_Store
 Thumbs.db
 
