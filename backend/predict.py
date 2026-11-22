@@ -26,6 +26,7 @@ class Predictor:
 
     def predict(self, readings: dict) -> dict:
         features = build_features(pd.DataFrame([readings]))
+        linha = features.iloc[0]
         score = float(self.model.predict_proba(features)[0, 1])
         threshold = self.metadata["threshold"]
         alert = score > threshold
@@ -42,4 +43,7 @@ class Predictor:
             "threshold": threshold,
             "model_version": self.metadata["model_version"],
             "out_of_training_range": outside,
+            "temp_diff": float(linha["temp_diff"]),
+            "power_w": float(linha["power_w"]),
+            "wear_x_torque": float(linha["wear_x_torque"]),
         }

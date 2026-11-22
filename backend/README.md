@@ -1,6 +1,6 @@
-# Sentinela · backend
+# Sentinela · backend + front
 
-API local de apoio à inspeção de máquinas. A Random Forest foi treinada no
+API local (e tela) de apoio à inspeção de máquinas. A Random Forest foi treinada no
 AI4I 2020 sintético, com 200 árvores, profundidade máxima 10, sem pesos de
 classe e sem reamostragem. O alerta é emitido quando o score é maior que 0,50.
 O score descreve associação com a classe de falha nas condições informadas.
@@ -18,8 +18,15 @@ python -m venv .venv
 ```
 
 Em Linux ou macOS, use `.venv/bin/python` no lugar de
-`.\.venv\Scripts\python.exe`. Abra
-[a documentação interativa](http://127.0.0.1:8000/docs) para testar.
+`.\.venv\Scripts\python.exe`.
+
+A API também serve o front (`../front/static`). Com o servidor no ar, abra
+[http://127.0.0.1:8000](http://127.0.0.1:8000) para a tela e
+[a documentação interativa](http://127.0.0.1:8000/docs) para testar a API.
+
+A aba "Validação do modelo" lê `models/metricas.json`, gerado pelo
+`train_export.py`. Se o arquivo não existir, rode o treinamento (seção abaixo)
+uma vez; sem ele, `GET /metricas` responde 503.
 
 O modelo já está em `models/random_forest.joblib`. O CSV é necessário apenas
 para repetir o treinamento. Versione o arquivo do modelo e
@@ -29,6 +36,7 @@ as versões de dependências indicadas para o modelo salvo.
 ## Contrato com o frontend
 
 - `GET /health` retorna o estado da API e a versão do modelo carregado.
+- `GET /metricas` retorna as métricas, gráficos e exemplos da validação (`models/metricas.json`).
 - `POST /predict` recebe JSON. Use `Content-Type: application/json`.
 
 ```json
@@ -61,6 +69,7 @@ esperado é classe 0, com score de aproximadamente 0,0013.
 | `message` | Texto para exibir ao usuário |
 | `threshold` | Limiar usado |
 | `model_version` | Identificador da versão do modelo |
+| `temp_diff`, `power_w`, `wear_x_torque` | Features calculadas pela API a partir das medições (K, W e min·Nm). A tela mostra esses indicadores |
 | `out_of_training_range` | Lista de medições fora dos mínimos e máximos vistos no treino. A API ainda calcula a previsão, que deve ser interpretada com cautela |
 
 Por padrão, o CORS aceita frontends locais nas portas 3000 e 5173,
@@ -71,7 +80,7 @@ com `localhost` ou `127.0.0.1`. Para outro endereço, configure
 
 Use o CSV [AI4I 2020 da UCI](https://archive.ics.uci.edu/dataset/601/ai4i),
 com o mesmo conteúdo e ordem de linhas usados no notebook. Na pasta
-`backend`, execute:
+`backend`, execute (o CSV fica na raiz do repositório):
 
 ```powershell
 .\.venv\Scripts\python.exe train_export.py --dataset ..\ai4i2020.csv
@@ -79,6 +88,8 @@ com o mesmo conteúdo e ordem de linhas usados no notebook. Na pasta
 
 Se o CSV estiver em `data/`, passe `--dataset ..\data\ai4i2020.csv`.
 O script reproduz a divisão original e usa os 6.000 registros de treino.
+Além do modelo e do `metadata.json`, ele gera o `models/metricas.json` com as
+métricas da validação (o teste não é lido). Versione os três arquivos juntos.
 Os metadados registram a configuração, as versões e os hashes do CSV e do
 modelo. A exportação foi comparada com os 2.000 registros de validação
 originais, reproduzindo as classes e os scores de referência. O teste
