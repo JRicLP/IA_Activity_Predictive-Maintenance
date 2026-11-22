@@ -67,3 +67,26 @@ def test_100_predictions_have_finite_decompositions():
         prediction = predictor.predict(item)
         explanation = service.explain_local(item, prediction)
         assert all(math.isfinite(row["contribution"]) for row in explanation["contributions"])
+
+
+def test_dashboard_starts_once(monkeypatch):
+    predictor = Predictor()
+    service = ExplainService(predictor)
+
+    class FakeThread:
+        def is_alive(self):
+            return True
+
+    class FakeExplainer:
+        def run_app(self, **kwargs):
+            return FakeThread()
+
+    monkeypatch.setattr(service, "_training_reference", lambda: __import__("pandas").DataFrame())
+    monkeypatch.setattr(service, "_compile", lambda features: FakeExplainer())
+
+    first = service.start_dashboard()
+    second = service.start_dashboard()
+
+    assert first["status"] == "starting"
+    assert first["url"] == "http://127.0.0.1:8850"
+    assert second["status"] == "running"

@@ -125,6 +125,17 @@ def explain(data: Measurements, request: Request):
     return {"prediction": prediction, "explanation": explained}
 
 
+@app.post("/dashboard/start")
+def start_dashboard(request: Request):
+    try:
+        return request.app.state.explain.start_dashboard()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="O dashboard Shapash nao ficou disponivel.",
+        ) from exc
+
+
 @app.post("/reports/generate", response_model=ReportResponse)
 def generate_report(data: Measurements, request: Request):
     predictor = request.app.state.predictor

@@ -4,7 +4,8 @@
 
 A API FastAPI reutiliza o `Predictor` e `build_features` já existentes. O
 Shapash calcula explicações locais da classe positiva 1 e uma importância
-global reproduzível. O dashboard Shapash é aberto separadamente pelo notebook.
+global reproduzível. O botão **Explicar previsão** inicia o dashboard
+Shapash em `http://127.0.0.1:8850` e abre-o em uma nova aba.
 
 ## Executar
 
@@ -16,6 +17,7 @@ cd backend
 Endpoints novos:
 
 - `POST /explain`
+- `POST /dashboard/start`
 - `POST /reports/generate`
 - `GET /health`
 
@@ -27,14 +29,19 @@ Copie `.env.example` para `.env` e configure:
 
 ```dotenv
 GEMINI_API_KEY=COLOQUE_SUA_CHAVE_AQUI
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
+GEMINI_FALLBACK_MODELS=gemini-3.1-flash-lite
 GEMINI_REPORTS_ENABLED=true
 GEMINI_TIMEOUT_SECONDS=30
+GEMINI_MAX_RETRIES=3
+GEMINI_RETRY_DELAY_SECONDS=1
 ```
 
 A chave nunca é enviada ao frontend. Sem chave ou com relatórios desativados,
 `POST /reports/generate` retorna HTTP 503. `/health`, `/predict`, `/metricas`
-e `/explain` continuam disponíveis.
+e `/explain` continuam disponíveis. Falhas temporárias 408/5xx são repetidas
+até três vezes com espera exponencial. HTTP 429 retorna imediatamente uma
+mensagem de limite gratuito, sem transformar o erro em retry infinito.
 
 ## Evidências
 

@@ -18,6 +18,8 @@ class ExplainService:
         self.reference_size = reference_size
         self._global_result = None
         self._lock = threading.Lock()
+        self._dashboard_thread = None
+        self.dashboard_port = 8850
 
     def _compile(self, features: pd.DataFrame):
         y_pred = pd.Series(
@@ -145,3 +147,27 @@ class ExplainService:
             "explanation_method": "shapash",
             "scale": "class_1_score",
         }
+
+    def start_dashboard(self) -> dict:
+        if self._dashboard_thread is not None and self._dashboard_thread.is_alive():
+            return {
+                "status": "running",
+                "url": f"http://127.0.0.1:{self.dashboard_port}",
+            }
+        with self._lock:
+            if self._dashboard_thread is not None and self._dashboard_thread.is_alive():
+                return {
+                    "status": "running",
+                    "url": f"http://127.0.0.1:{self.dashboard_port}",
+                }
+            features = self._training_reference()
+            explainer = self._compile(features)
+            self._dashboard_thread = explainer.run_app(
+                port=self.dashboard_port,
+                host="127.0.0.1",
+                title_story="Sentinela - explicabilidade Shapash",
+            )
+            return {
+                "status": "starting",
+                "url": f"http://127.0.0.1:{self.dashboard_port}",
+            }

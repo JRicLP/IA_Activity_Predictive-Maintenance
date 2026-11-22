@@ -78,34 +78,26 @@ window.iniciarAgente = function (raiz, obterContexto) {
     const contexto = contextoAtual();
     if (!contexto) return;
     explicar.disabled = true;
-    estado.textContent = "Calculando explicação...";
+    estado.textContent = "Preparando dashboard Shapash...";
     saida.replaceChildren();
+    const novaAba = window.open("", "_blank");
     try {
-      const resposta = await fetch("explain", {
+      const resposta = await fetch("dashboard/start", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(contexto.entrada),
       });
       if (!resposta.ok) throw new Error(String(resposta.status));
       const dados = await resposta.json();
-      const ex = dados.explanation;
-      estado.textContent = "Explicação pronta.";
-
-      const card = document.createElement("section");
-      card.className = "agente-card";
-      const titulo = document.createElement("h4");
-      titulo.textContent = `Contribuições — score ${dados.prediction.model_score.toFixed(3)}`;
-      card.append(titulo);
-      ex.contributions.slice(0, 8).forEach(item => card.append(linhaContribuicao(item)));
-      if (ex.out_of_training_range.length) {
-        const aviso = document.createElement("p");
-        aviso.className = "faixa";
-        aviso.textContent = `Fora da faixa de treino: ${ex.out_of_training_range.join(", ")}`;
-        card.append(aviso);
+      if (novaAba) {
+        novaAba.location.href = dados.url;
+      } else {
+        window.location.assign(dados.url);
       }
-      saida.append(card);
+      estado.textContent = "Dashboard Shapash aberto em outra aba.";
     } catch (erro) {
-      estado.textContent = mensagemErro(Number(erro.message), "Não foi possível explicar a previsão.");
+      if (novaAba) novaAba.close();
+      estado.textContent = mensagemErro(Number(erro.message), "Não foi possível abrir o dashboard Shapash.");
     } finally {
       explicar.disabled = false;
     }

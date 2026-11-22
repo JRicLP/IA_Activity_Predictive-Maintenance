@@ -80,7 +80,8 @@ Copie `.env.example` para `.env` e configure somente no backend:
 
 ```dotenv
 GEMINI_API_KEY=COLOQUE_SUA_CHAVE_AQUI
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
+GEMINI_FALLBACK_MODELS=gemini-3.1-flash-lite
 GEMINI_REPORTS_ENABLED=true
 GEMINI_TIMEOUT_SECONDS=30
 ```
@@ -130,6 +131,7 @@ Acesse pelo navegador:
 - `POST /predict`: calcula o alerta e os indicadores derivados.
 - `POST /explain`: recalcula a previsão e retorna contribuições locais e
   importância global da classe positiva `1`.
+- `POST /dashboard/start`: inicia o dashboard interativo Shapash na porta `8850`.
 - `POST /reports/generate`: gera um relatório Gemini a partir de evidências
   JSON calculadas no servidor.
 

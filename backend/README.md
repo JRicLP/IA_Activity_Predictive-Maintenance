@@ -80,6 +80,7 @@ com `localhost` ou `127.0.0.1`. Para outro endereço, configure
 
 - `POST /explain` calcula contribuições locais da classe positiva 1 e devolve
   uma importância global cacheada.
+- `POST /dashboard/start` inicia o dashboard Shapash interativo.
 - `POST /reports/generate` recalcula a previsão no servidor e gera um relatório
   estruturado por Gemini a partir de evidências JSON.
 
