@@ -4,33 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>sentinela · apoio à inspeção industrial</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="agente.css">
 <style>
 :root{--bg:#121a1e;--panel:#16232a;--line:#26373f;--tx:#e9f0f2;--mut:#93a6ad;--ac:#6fd3b8;--wn:#f0a27a;--wnbg:#3b2a22;--okbg:#17322d}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:#0d1114;color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,sans-serif;padding:28px}
 .app{max-width:1400px;margin:auto;background:var(--bg);border:1px solid var(--line);border-radius:20px;overflow:hidden}
-header{display:flex;align-items:center;gap:16px;padding:22px 28px;border-bottom:1px solid var(--line)}
+header{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;padding:22px 28px;border-bottom:1px solid var(--line)}
 header h1{margin:0;font-size:22px}header h1 span{color:var(--ac)}
 header small{display:block;color:var(--mut);font-size:13px;font-weight:400}
-.badge{border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px}
-nav{display:flex;gap:22px;padding:0 28px;border-bottom:1px solid var(--line)}
-nav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:14px 0;font:inherit;cursor:pointer}
+.badge{border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px;white-space:nowrap}
+nav{display:flex;flex-wrap:wrap;gap:0 22px;padding:0 28px;border-bottom:1px solid var(--line)}
+nav button{flex:1 1 150px;background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:14px 0;font:inherit;cursor:pointer}
 nav button.on{color:var(--ac);border-color:var(--ac)}
 main{padding:28px}h2{margin:0 0 4px;font-size:26px}.sub{color:var(--mut);margin:0 0 22px}
-.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:22px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}body{padding:10px}}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px}
+.grid>div,.card{min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:22px}
 .card h3{margin:0 0 14px;font-size:16px}
-.ex{display:flex;gap:8px;align-items:center;color:var(--mut);font-size:13px;margin-bottom:14px}
+.ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--mut);font-size:13px;margin-bottom:14px}
 .ex button,.btn2{background:none;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
 label{display:block;color:var(--mut);font-size:13px;margin-bottom:4px}
 input,select{width:100%;background:#0f1a1f;border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:11px 12px;font:inherit}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
-.acts{display:flex;gap:10px;margin-top:18px}
+.field-help{display:block;color:var(--mut);font-size:11.5px;line-height:1.35;margin-top:5px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
 .btn{background:var(--ac);color:#0b2620;border:0;border-radius:8px;padding:11px 18px;cursor:pointer;font:inherit;font-weight:600}
 .btn2{padding:11px 16px}
+button:disabled{cursor:not-allowed;opacity:.62}
 .note{color:var(--mut);font-size:12.5px;margin-top:10px}
 .res{border-radius:10px;padding:18px;margin-bottom:16px}
 .res.alerta{background:var(--wnbg)}.res.ok{background:var(--okbg)}
@@ -40,15 +44,14 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outlin
 .bar{position:relative;height:7px;background:#2a3a41;border-radius:9px;margin:8px 0 6px}
 .bar i{position:absolute;inset:0 auto 0 0;background:var(--ac);border-radius:9px}
 .bar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--wn)}
-.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.row b{font-weight:600}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.row b{font-weight:600;text-align:right}
 details{margin-top:14px;color:var(--mut);font-size:13.5px}summary{color:var(--ac);cursor:pointer;margin-bottom:8px}
 .ref{color:var(--wn);font-size:13px;margin-top:10px}
-.ch{position:relative;height:290px}
+.ch{position:relative;height:290px;max-width:100%}.ch canvas{max-width:100%}
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
 .kpi span{color:var(--mut);font-size:13px}.kpi b{display:block;font-size:26px;margin-top:2px}
-table.cm{border-collapse:collapse;width:100%;text-align:center}
+table.cm{border-collapse:collapse;width:100%;table-layout:fixed;text-align:center}
 .cm td,.cm th{padding:12px;border:1px solid var(--line);font-weight:500}.cm th{color:var(--mut);font-size:13px}
 .cm td.hit{background:var(--okbg)}.cm td.miss{background:var(--wnbg)}
 footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
@@ -66,11 +69,22 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
 .agente-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .agente-top h3{margin:0;font-size:16px}
 #agente-root{flex:1;overflow:auto;padding:20px}
+@media(max-width:900px){
+  body{padding:10px}.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  body{padding:6px}.app{border-radius:12px}header,main{padding:18px 14px}header h1{flex:1 1 100%}
+  .agente-btn{margin-left:0;width:100%}nav{padding:0 14px;gap:0 12px}
+  h2{font-size:22px}.form{grid-template-columns:1fr}.card{padding:16px;margin-bottom:16px}
+  .acts>*{flex:1 1 100%}.kpis{gap:10px}.kpi{padding:12px}.kpi b{font-size:22px}
+  .pct{align-items:flex-start;flex-direction:column}.pct b{font-size:34px}.ch{height:250px}
+  .cm td,.cm th{padding:8px 4px;font-size:11px;overflow-wrap:anywhere}footer{padding:0 14px 18px}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header><h1>sentinela <span>/</span><small>Apoio à inspeção industrial</small></h1><span class="badge">Rascunho · AI4I sintético</span><button class="btn2 agente-btn" id="btnAgente" type="button" aria-expanded="false" aria-controls="agente">Explicar com IA</button></header>
+<header><h1>sentinela <span>/</span><small>Apoio à inspeção industrial</small></h1><span class="badge">Dados sintéticos · AI4I 2020</span><button class="btn2 agente-btn" id="btnAgente" type="button" aria-expanded="false" aria-controls="agente" hidden>Explicar com IA</button></header>
 <nav><button class="on" data-aba="analisar">Analisar condições</button><button data-aba="validacao">Validação do modelo</button></nav>
 
 <main id="analisar">
@@ -81,11 +95,11 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
    <div class="ex">Exemplos da validação <button id="exOk">Sem alerta</button><button id="exAl">Com alerta</button></div>
    <div class="form">
     <div><label for="type">Tipo de produto</label><select id="type"><option value="L">L · qualidade baixa</option><option value="M">M · qualidade média</option><option value="H">H · qualidade alta</option></select></div>
-    <div><label for="tool_wear">Desgaste da ferramenta · min</label><input id="tool_wear" inputmode="decimal" value="22"></div>
-    <div><label for="air_temp">Temperatura do ar · K</label><input id="air_temp" inputmode="decimal" value="301,9"></div>
-    <div><label for="process_temp">Temperatura do processo · K</label><input id="process_temp" inputmode="decimal" value="310,4"></div>
-    <div><label for="rpm">Rotação · rpm</label><input id="rpm" inputmode="decimal" value="1286"></div>
-    <div><label for="torque">Torque · Nm</label><input id="torque" inputmode="decimal" value="62,8"></div>
+    <div><label for="tool_wear">Desgaste da ferramenta · min</label><input id="tool_wear" inputmode="decimal" value="22" aria-describedby="range-tool-wear"><small class="field-help" id="range-tool-wear">Faixa observada no treino: 0–253 min</small></div>
+    <div><label for="air_temp">Temperatura do ar · K</label><input id="air_temp" inputmode="decimal" value="301,9" aria-describedby="range-air-temp"><small class="field-help" id="range-air-temp">Faixa observada no treino: 295,3–304,5 K</small></div>
+    <div><label for="process_temp">Temperatura do processo · K</label><input id="process_temp" inputmode="decimal" value="310,4" aria-describedby="range-process-temp"><small class="field-help" id="range-process-temp">Faixa observada no treino: 305,7–313,8 K</small></div>
+    <div><label for="rpm">Rotação · rpm</label><input id="rpm" inputmode="decimal" value="1286" aria-describedby="range-rpm"><small class="field-help" id="range-rpm">Faixa observada no treino: 1.168–2.886 rpm</small></div>
+    <div><label for="torque">Torque · Nm</label><input id="torque" inputmode="decimal" value="62,8" aria-describedby="range-torque"><small class="field-help" id="range-torque">Faixa observada no treino: 3,8–76,6 Nm</small></div>
    </div>
    <div class="acts"><button class="btn" id="go">Analisar condições</button><button class="btn2" id="fix">Fixar como referência</button></div>
    <p class="note" id="status">Preencha as medições e clique em analisar.</p>
@@ -114,10 +128,10 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
 </main>
 
 <main id="validacao" class="hide">
-<h2>Quão confiável é o modelo?</h2><p class="sub">Resultados no conjunto de validação (2.000 linhas). O teste fica reservado para a avaliação final; como a validação também serviu para escolher o modelo, estes números não são uma estimativa final independente.</p>
+<h2>Quão confiável é o modelo?</h2><p class="sub"><span id="validacaoTotal">Resultados no conjunto de validação.</span> O teste fica reservado para a avaliação final; como a validação também serviu para escolher o modelo, estes números não são uma estimativa final independente.</p>
 <div class="kpis" id="kpis"></div>
 <div class="grid">
- <div class="card"><h3>Matriz de confusão</h3><table class="cm" id="cm"></table><p class="note">Só 68 falhas na validação: cada falha vale cerca de 1,5 ponto de recall. Leia com cautela.</p></div>
+ <div class="card"><h3>Matriz de confusão</h3><table class="cm" id="cm"></table><p class="note" id="validacaoFalhas">Os dados de falhas serão calculados a partir da matriz de confusão.</p></div>
  <div class="card"><h3>Curva precisão × recall</h3><div class="ch"><canvas id="cPR"></canvas></div></div>
  <div class="card"><h3>Importância das variáveis</h3><div class="ch"><canvas id="cImp"></canvas></div></div>
  <div class="card"><h3>Distribuição do score por classe</h3><div class="ch"><canvas id="cHist"></canvas></div></div>
@@ -126,7 +140,7 @@ footer{padding:0 28px 24px;color:var(--mut);font-size:13px}
 <footer>Demonstração com dados sintéticos. Alterar medições compara a resposta do modelo; não comprova o efeito de uma intervenção real.</footer>
 </div>
 
-<aside id="agente" class="agente hide" role="dialog" aria-labelledby="agenteTitulo">
+<aside id="agente" class="agente" role="dialog" aria-labelledby="agenteTitulo" hidden>
   <div class="agente-top"><h3 id="agenteTitulo">Agente de explicabilidade</h3><button class="btn2" id="agenteFechar" type="button">Fechar</button></div>
   <div id="agente-root"><p class="note">O agente de IA ainda não foi conectado.</p></div>
 </aside>
@@ -143,26 +157,56 @@ const AC="#6fd3b8",WN="#f0a27a",charts={};
 // Nomes internos do front -> nomes da API (POST /predict). Se a API mudar, mexa só aqui.
 const CAMPOS={type:"type",tool_wear:"tool_wear_min",air_temp:"air_temperature_k",process_temp:"process_temperature_k",rpm:"rotational_speed_rpm",torque:"torque_nm"};
 const ROTULO={air_temperature_k:"temperatura do ar",process_temperature_k:"temperatura do processo",rotational_speed_rpm:"rotação",torque_nm:"torque",tool_wear_min:"desgaste da ferramenta"};
+const ROTULO_IMPORTANCIA={air_temperature_k:"Temperatura do ar",process_temperature_k:"Temperatura do processo",rotational_speed_rpm:"Rotação",torque_nm:"Torque",tool_wear_min:"Desgaste da ferramenta",temp_diff:"Diferença de temperatura",power_w:"Potência calculada",wear_x_torque:"Desgaste × torque",Type_H:"Tipo H",Type_L:"Tipo L",Type_M:"Tipo M"};
 function paraApi(d){const o={};for(const k in CAMPOS)o[CAMPOS[k]]=d[k];return o}
 function deApi(a){const o={};for(const k in CAMPOS)o[k]=a[CAMPOS[k]];return o}
-let M=null,ref=null,validOk=false;
+let M=null,ref=null,validOk=false,analiseEmAndamento=false;
 
 function ler(){return{type:$("type").value,tool_wear:num("tool_wear"),air_temp:num("air_temp"),process_temp:num("process_temp"),rpm:num("rpm"),torque:num("torque")}}
 function preencher(d){for(const k in d)$(k).value=typeof d[k]==="number"?String(d[k]).replace(".",","):d[k]}
 function chart(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart($(id),cfg)}
 
+class ErroAnalise extends Error{constructor(tipo){super(tipo);this.tipo=tipo}}
+function definirCarregamento(ativo){
+  analiseEmAndamento=ativo;
+  $("go").disabled=ativo;$("go").textContent=ativo?"Analisando...":"Analisar condições";
+  $("go").setAttribute("aria-busy",String(ativo));
+  ["exOk","exAl","fix"].forEach(id=>$(id).disabled=ativo);
+  document.querySelectorAll(".form input,.form select").forEach(campo=>campo.disabled=ativo);
+}
 async function analisar(){
+  if(analiseEmAndamento)return false;
   const d=ler();
-  if(Object.values(d).some(v=>v!==v)){$("status").textContent="Confira os campos: todos precisam ser números.";return}
+  if(Object.values(d).some(v=>v!==v)){$("status").textContent="Confira os campos: todos precisam ser números.";return false}
+  definirCarregamento(true);
   $("status").textContent="Analisando…";
   try{
-    const r=await fetch("predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(paraApi(d))});
-    if(!r.ok)throw new Error("Valores fora da faixa aceita (confira unidades em K, rpm, Nm e min).");
-    const j=await r.json();
+    let r;
+    try{r=await fetch("predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(paraApi(d))})}
+    catch{throw new ErroAnalise("rede")}
+    if(r.status===422)throw new ErroAnalise("http-422");
+    if(r.status===500||r.status===503)throw new ErroAnalise("http-servidor");
+    if(!r.ok)throw new ErroAnalise("http-outro");
+    let j;
+    try{j=await r.json()}catch{throw new ErroAnalise("json-invalido")}
+    if(!j||![j.model_score,j.threshold,j.temp_diff,j.power_w,j.wear_x_torque].every(Number.isFinite)||typeof j.inspection_recommended!=="boolean"||!Array.isArray(j.out_of_training_range))throw new ErroAnalise("json-invalido");
     // traduz a resposta da API para os nomes que o resto da tela já usa; "bruto" guarda a resposta original
     mostrar(d,{score:j.model_score,alerta:j.inspection_recommended,limiar:j.threshold,temp_diff:j.temp_diff,power_w:j.power_w,wear_x_torque:j.wear_x_torque,fora_faixa:j.out_of_training_range,bruto:j});
     $("status").textContent="Resultado atualizado para as medições acima.";
-  }catch(e){$("status").textContent="Não foi possível analisar: "+e.message}
+    return true;
+  }catch(e){
+    const mensagens={
+      rede:"Não consegui conectar à API. Confirme que o servidor uvicorn está rodando.",
+      "http-422":"Valores fora da faixa aceita (confira unidades em K, rpm, Nm e min).",
+      "http-servidor":"A API respondeu com erro. Veja o terminal do uvicorn.",
+      "http-outro":"Não foi possível concluir a análise. Tente novamente.",
+      "json-invalido":"A API retornou uma resposta inválida. Veja o terminal do uvicorn."
+    };
+    $("status").textContent=mensagens[e.tipo]||"Não foi possível concluir a análise. Tente novamente.";
+    return false;
+  }finally{
+    definirCarregamento(false);
+  }
 }
 
 function mostrar(d,r){
@@ -199,18 +243,32 @@ function graficos(d,r){
     scales:{x:{min:0,suggestedMax:120,ticks:{callback:t=>t+"%"}}}}});
 }
 
+function matrizConfusaoValida(c){return Array.isArray(c)&&c.length===2&&c.every(l=>Array.isArray(l)&&l.length===2&&l.every(Number.isFinite))}
+function atualizarResumoValidacao(c){
+  if(!matrizConfusaoValida(c)){
+    $("validacaoTotal").textContent="Resultados do conjunto de validação indisponíveis.";
+    $("validacaoFalhas").textContent="Não foi possível calcular a quantidade de falhas sem uma matriz de confusão válida.";
+    return;
+  }
+  const [tn,fp,fn,tp]=[c[0][0],c[0][1],c[1][0],c[1][1]],total=tn+fp+fn+tp,falhas=fn+tp;
+  $("validacaoTotal").textContent=`Resultados no conjunto de validação (${fmt(total)} linhas).`;
+  $("validacaoFalhas").textContent=falhas>0?`Há ${fmt(falhas)} falhas na validação: cada falha vale cerca de ${fmt(100/falhas,1)} ponto percentual de recall. Leia com cautela.`:"Não há falhas na validação; não é possível calcular o impacto de uma falha no recall. Leia com cautela.";
+}
 function validacao(){
-  if(validOk)return;validOk=true;
+  if(validOk)return;
+  if(!M){$("kpis").innerHTML='<p class="note">Carregando métricas de validação…</p>';return}
+  validOk=true;
   const k=[["PR-AUC",M.pr_auc],["Recall",M.recall],["Precisão",M.precisao],["F1",M.f1],["Limiar de alerta",M.limiar]];
   $("kpis").innerHTML=k.map(a=>`<div class="kpi"><span>${a[0]}</span><b>${fmt(a[1],2)}</b></div>`).join("");
   const c=M.matriz_confusao;
-  $("cm").innerHTML=`<tr><th></th><th>Previsto: sem falha</th><th>Previsto: falha</th></tr>
-   <tr><th>Real: sem falha</th><td class="hit">${c[0][0]}</td><td class="miss">${c[0][1]}</td></tr>
-   <tr><th>Real: falha</th><td class="miss">${c[1][0]}</td><td class="hit">${c[1][1]}</td></tr>`;
+  atualizarResumoValidacao(c);
+  $("cm").innerHTML=matrizConfusaoValida(c)?`<tr><th></th><th>Previsto: sem falha</th><th>Previsto: falha</th></tr>
+   <tr><th>Real: sem falha</th><td class="hit">${fmt(c[0][0])}</td><td class="miss">${fmt(c[0][1])}</td></tr>
+   <tr><th>Real: falha</th><td class="miss">${fmt(c[1][0])}</td><td class="hit">${fmt(c[1][1])}</td></tr>`:'<tr><td>Matriz de confusão indisponível.</td></tr>';
   chart("cPR",{type:"line",data:{labels:M.curva_pr.recall.map(x=>fmt(x,2)),datasets:[{data:M.curva_pr.precisao,borderColor:AC,pointRadius:0,tension:.2}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:"Recall"}},y:{min:0,max:1,title:{display:true,text:"Precisão"}}}}});
   const imp=Object.entries(M.importancias).sort((a,b)=>b[1]-a[1]);
-  chart("cImp",{type:"bar",data:{labels:imp.map(a=>a[0]),datasets:[{data:imp.map(a=>a[1]),backgroundColor:AC}]},
+  chart("cImp",{type:"bar",data:{labels:imp.map(a=>ROTULO_IMPORTANCIA[a[0]]||a[0]),datasets:[{data:imp.map(a=>a[1]),backgroundColor:AC}]},
     options:{indexAxis:"y",maintainAspectRatio:false,plugins:{legend:{display:false}}}});
   const lb=M.hist_score.falha.map((_,i)=>fmt(i/20,2));
   chart("cHist",{type:"bar",data:{labels:lb,datasets:[{label:"Sem falha",data:M.hist_score.sem_falha,backgroundColor:AC},{label:"Falha",data:M.hist_score.falha,backgroundColor:WN}]},
@@ -224,11 +282,20 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
 });
 $("go").onclick=analisar;
 $("fix").onclick=()=>{if(window._ult){ref=window._ult;mostrar(ref.d,ref.r);$("refTxt").textContent="Referência fixada. Altere as medições e analise de novo para comparar.";$("status").textContent="Referência fixada."}};
-$("exOk").onclick=()=>{preencher(deApi(M.exemplos.sem_alerta));analisar()};
-$("exAl").onclick=()=>{preencher(deApi(M.exemplos.com_alerta));analisar()};
+async function analisarExemplo(tipo){
+  if(analiseEmAndamento)return;
+  if(!M||!M.exemplos||!M.exemplos[tipo]){$("status").textContent="Exemplo de validação indisponível.";return}
+  preencher(deApi(M.exemplos[tipo]));await analisar();
+}
+$("exOk").onclick=()=>analisarExemplo("sem_alerta");
+$("exAl").onclick=()=>analisarExemplo("com_alerta");
 /* ---- Agente de IA: botão e painel ----
    A lógica do agente fica em agente.js (função window.iniciarAgente), feito pelo colega.
-   Aqui só abrimos/fechamos o painel e entregamos o contexto da última análise. */
+   Aqui só abrimos/fechamos o painel e entregamos o contexto da última análise.
+   Para reativar o recurso na interface, defina AGENTE_HABILITADO como true. */
+const AGENTE_HABILITADO=false;
+$("btnAgente").hidden=!AGENTE_HABILITADO;
+$("agente").hidden=true;
 function contextoAgente(){
   const u=window._ult;
   // entrada = corpo do POST /predict; resultado = resposta original da API
@@ -236,16 +303,17 @@ function contextoAgente(){
 }
 let agenteIniciado=false;
 function abrirAgente(){
-  $("agente").classList.remove("hide");$("btnAgente").setAttribute("aria-expanded","true");
+  if(!AGENTE_HABILITADO)return;
+  $("agente").hidden=false;$("btnAgente").setAttribute("aria-expanded","true");
   if(!agenteIniciado&&typeof window.iniciarAgente==="function"){agenteIniciado=true;window.iniciarAgente($("agente-root"),contextoAgente)}
   $("agenteFechar").focus();
 }
-function fecharAgente(){$("agente").classList.add("hide");$("btnAgente").setAttribute("aria-expanded","false");$("btnAgente").focus()}
-$("btnAgente").onclick=()=>$("agente").classList.contains("hide")?abrirAgente():fecharAgente();
+function fecharAgente(){$("agente").hidden=true;$("btnAgente").setAttribute("aria-expanded","false");$("btnAgente").focus()}
+$("btnAgente").onclick=()=>$("agente").hidden?abrirAgente():fecharAgente();
 $("agenteFechar").onclick=fecharAgente;
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("agente").classList.contains("hide"))fecharAgente()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("agente").hidden)fecharAgente()});
 
-fetch("metricas").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(m=>{M=m;analisar()}).catch(()=>{$("status").textContent="Não foi possível carregar as métricas. Confirme que a API está no ar (uvicorn app:app) e que train_export.py já foi executado."});
+fetch("metricas").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(m=>{M=m;if(!$("validacao").classList.contains("hide"))validacao();analisar()}).catch(()=>{$("status").textContent="Não foi possível carregar as métricas. Confirme que a API está no ar (uvicorn app:app) e que train_export.py já foi executado."});
 </script>
 </body>
 </html>

@@ -158,6 +158,11 @@ A interface possui os botões **Explicar previsão** e
 **Gerar relatório com Gemini**. Os dois são acionados explicitamente pelo
 usuário e utilizam o mesmo conteúdo da última previsão.
 
+Na versão de apresentação, o acesso ao painel de IA fica oculto por padrão.
+Para reativá-lo, altere `AGENTE_HABILITADO` para `true` em
+`front/static/index.html`; as integrações e rotas de explicabilidade e
+relatórios permanecem disponíveis no código.
+
 O notebook [Shapash_Explainability.ipynb](notebooks/Shapash_Explainability.ipynb)
 executa a explicação reproduzível separadamente da aplicação web. Consulte
 [EXPLICABILIDADE_E_RELATORIOS.md](docs/EXPLICABILIDADE_E_RELATORIOS.md) para
