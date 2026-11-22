@@ -3,8 +3,14 @@
 # Python caches and local tooling
 __pycache__/
 *.py[cod]
+.ipynb_checkpoints/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.vscode/
 
 # Local configuration and operating-system files
 .env
@@ -13,7 +19,12 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Artifacts accidentally generated at the repository root.
-# The application assets under front/ are required and remain tracked.
+# Logs and build artifacts
+*.log
+dist/
+build/
+*.egg-info/
+
+# Accidental copies at the repository root
 /modelo_rf.joblib
 /metricas.json
