@@ -8,17 +8,17 @@ Uma recomendação de inspeção serve como apoio à análise.
 
 ## Executar
 
-Use Python 3.12. A partir da raiz do repositório:
+Use Python 3.13.9. A partir da raiz do repositório:
 
 ```powershell
 cd backend
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
+py -3.13 -m venv ..\.venv
+..\.venv\Scripts\python.exe -m pip install -r requirements.txt
+..\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Em Linux ou macOS, use `.venv/bin/python` no lugar de
-`.\.venv\Scripts\python.exe`.
+Em Linux ou macOS, use `../.venv/bin/python` no lugar de
+`..\.venv\Scripts\python.exe`.
 
 A API também serve o front (`../front/static`). Com o servidor no ar, abra
 [http://127.0.0.1:8000](http://127.0.0.1:8000) para a tela e
@@ -76,6 +76,17 @@ Por padrão, o CORS aceita frontends locais nas portas 3000 e 5173,
 com `localhost` ou `127.0.0.1`. Para outro endereço, configure
 `SENTINELA_ALLOWED_ORIGINS` com a lista de origens separadas por vírgula.
 
+## Explicabilidade e relatório
+
+- `POST /explain` calcula contribuições locais da classe positiva 1 e devolve
+  uma importância global cacheada.
+- `POST /dashboard/start` inicia o dashboard Shapash interativo.
+- `POST /reports/generate` recalcula a previsão no servidor e gera um relatório
+  estruturado por Gemini a partir de evidências JSON.
+
+Configure o Gemini a partir de `.env.example`. A chave permanece no backend.
+Consulte `docs/EXPLICABILIDADE_E_RELATORIOS.md` para limites e execução.
+
 ## Reproduzir o treinamento
 
 Use o CSV [AI4I 2020 da UCI](https://archive.ics.uci.edu/dataset/601/ai4i),
@@ -83,7 +94,7 @@ com o mesmo conteúdo e ordem de linhas usados no notebook. Na pasta
 `backend`, execute (o CSV fica na raiz do repositório):
 
 ```powershell
-.\.venv\Scripts\python.exe train_export.py --dataset ..\ai4i2020.csv
+..\.venv\Scripts\python.exe train_export.py --dataset ..\ai4i2020.csv
 ```
 
 Se o CSV estiver em `data/`, passe `--dataset ..\data\ai4i2020.csv`.

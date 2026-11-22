@@ -23,5 +23,133 @@
  * Troque o conteúdo desta função pelo agente real.
  */
 window.iniciarAgente = function (raiz, obterContexto) {
-  raiz.innerHTML = '<p class="note">O agente de IA ainda não foi conectado.</p>';
+  raiz.replaceChildren();
+
+  const estado = document.createElement("p");
+  estado.className = "agente-status";
+  estado.textContent = "Realize uma previsão para habilitar a explicação.";
+
+  const acoes = document.createElement("div");
+  acoes.className = "agente-actions";
+  const explicar = document.createElement("button");
+  explicar.type = "button";
+  explicar.className = "btn";
+  explicar.textContent = "Explicar previsão";
+  const relatorio = document.createElement("button");
+  relatorio.type = "button";
+  relatorio.className = "btn2";
+  relatorio.textContent = "Gerar relatório com Gemini";
+  acoes.append(explicar, relatorio);
+
+  const saida = document.createElement("div");
+  raiz.append(acoes, estado, saida);
+
+  function contextoAtual() {
+    const contexto = obterContexto();
+    if (!contexto) {
+      estado.textContent = "Realize uma previsão antes de solicitar uma explicação.";
+      return null;
+    }
+    return contexto;
+  }
+
+  function mensagemErro(status, fallback) {
+    if (status === 503) return "O recurso não está disponível no momento. Confira a configuração do backend.";
+    if (status === 429) return "Limite gratuito atingido ou cooldown ativo. Aguarde e tente novamente.";
+    if (status === 504) return "A consulta excedeu o tempo limite.";
+    if (status === 502) return "O provedor retornou uma falha ou uma resposta inválida.";
+    return fallback;
+  }
+
+  function linhaContribuicao(item) {
+    const linha = document.createElement("div");
+    linha.className = "contrib-row";
+    const nome = document.createElement("span");
+    nome.textContent = item.feature;
+    const valor = document.createElement("b");
+    const positivo = item.contribution >= 0;
+    valor.className = positivo ? "contrib-pos" : "contrib-neg";
+    valor.textContent = `${positivo ? "+" : ""}${item.contribution.toExponential(3)}`;
+    linha.append(nome, valor);
+    return linha;
+  }
+
+  explicar.addEventListener("click", async () => {
+    const contexto = contextoAtual();
+    if (!contexto) return;
+    explicar.disabled = true;
+    estado.textContent = "Preparando dashboard Shapash...";
+    saida.replaceChildren();
+    const novaAba = window.open("", "_blank");
+    try {
+      const resposta = await fetch("dashboard/start", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(contexto.entrada),
+      });
+      if (!resposta.ok) throw new Error(String(resposta.status));
+      const dados = await resposta.json();
+      if (novaAba) {
+        novaAba.location.href = dados.url;
+      } else {
+        window.location.assign(dados.url);
+      }
+      estado.textContent = "Dashboard Shapash aberto em outra aba.";
+    } catch (erro) {
+      if (novaAba) novaAba.close();
+      estado.textContent = mensagemErro(Number(erro.message), "Não foi possível abrir o dashboard Shapash.");
+    } finally {
+      explicar.disabled = false;
+    }
+  });
+
+  relatorio.addEventListener("click", async () => {
+    const contexto = contextoAtual();
+    if (!contexto) return;
+    relatorio.disabled = true;
+    estado.textContent = "Gerando relatório técnico...";
+    saida.replaceChildren();
+    try {
+      const resposta = await fetch("reports/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(contexto.entrada),
+      });
+      if (!resposta.ok) throw new Error(String(resposta.status));
+      const dados = await resposta.json();
+      const report = dados.report;
+      estado.textContent = "Relatório gerado.";
+
+      const painel = document.createElement("section");
+      painel.className = "agente-card agente-report";
+      function bloco(titulo, texto) {
+        const h = document.createElement("h4");
+        h.textContent = titulo;
+        const p = document.createElement("p");
+        p.textContent = texto;
+        painel.append(h, p);
+      }
+      function lista(titulo, itens) {
+        const h = document.createElement("h4");
+        h.textContent = titulo;
+        const ul = document.createElement("ul");
+        itens.forEach(texto => {
+          const li = document.createElement("li");
+          li.textContent = texto;
+          ul.append(li);
+        });
+        painel.append(h, ul);
+      }
+      bloco("Resumo", report.summary);
+      lista("Principais fatores", report.main_factors);
+      lista("Limitações", report.limitations);
+      lista("Ações recomendadas", report.recommended_actions);
+      bloco("Conclusão", report.conclusion);
+      saida.append(painel);
+    } catch (erro) {
+      estado.textContent = mensagemErro(Number(erro.message), "Não foi possível gerar o relatório.");
+    } finally {
+      relatorio.disabled = false;
+    }
+  });
 };

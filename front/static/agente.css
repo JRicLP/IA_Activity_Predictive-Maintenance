@@ -1,3 +1,13 @@
 /* agente.css — estilos do agente de IA (chat), feito pelo colega.
  * O painel (.agente), o botão e as variáveis de cor (--panel, --line, --tx,
  * --mut, --ac, --wn) já existem no index.html. Use as variáveis para manter o visual. */
+.agente-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.agente-status{color:var(--mut);min-height:20px;margin:10px 0}
+.agente-card{border:1px solid var(--line);border-radius:10px;padding:12px;margin:12px 0;background:rgba(0,0,0,.08)}
+.agente-card h4{margin:0 0 8px;font-size:14px}
+.contrib-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
+.contrib-row:last-child{border-bottom:0}
+.contrib-pos{color:var(--wn)}
+.contrib-neg{color:var(--ac)}
+.agente-report h4{margin:14px 0 4px;font-size:14px}
+.agente-report p,.agente-report ul{margin:6px 0;font-size:13px}
