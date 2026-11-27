@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinela — Gêmeo digital</title>
+  <link rel="stylesheet" href="/demo-assets/style.css">
+  <script src="/demo-assets/demo.js" defer></script>
+</head>
+<body>
+<header class="top"><div><strong>Sentinela<span> /</span></strong><span class="title-divider"></span><span>Gêmeo digital</span></div><span class="tag">Demonstração local</span></header>
+<main>
+  <section class="intro">
+    <div><p class="eyebrow">Monitoramento de máquina</p><h1>Máquina 01</h1><p class="description">Reprodução de leituras do AI4I 2020 com horários simulados.</p></div>
+    <div class="controls">
+      <div class="buttons">
+        <button type="button" id="play" class="primary" disabled>Reproduzir</button>
+        <button type="button" id="step" disabled>Avançar leitura</button>
+        <button type="button" id="reset" disabled>Reiniciar</button>
+      </div>
+      <p id="progress">Carregando leituras…</p>
+    </div>
+  </section>
+  <p id="error" role="alert" hidden></p>
+  <section class="status" id="status" aria-live="polite">
+    <div><p class="eyebrow">Última análise</p><h2 id="decision">Aguardando leitura</h2><p id="stamp">—</p></div>
+    <div class="score"><span>Score de falha</span><strong id="score">—</strong><small id="threshold">Limiar: —</small></div>
+  </section>
+  <section class="main-grid">
+    <article class="panel"><h2>Evolução do score</h2><p class="muted">Últimas 30 leituras processadas</p>
+      <div id="chart" class="chart" role="img" aria-label="Histórico do score e limiar de inspeção"></div>
+      <p class="legend"><span><i></i> Score da RF</span><span><i class="dashed"></i> Limiar</span><span><i class="point"></i> Inspeção indicada</span></p>
+    </article>
+    <article class="panel readings"><h2>Condição atual</h2>
+      <dl id="readings"></dl>
+      <p id="range" class="range" hidden></p>
+    </article>
+  </section>
+  <section class="panel history">
+    <div class="history-title"><h2>Histórico de leituras</h2><span id="alerts">0 alertas</span></div>
+    <div class="scroll-table"><table>
+      <thead><tr><th scope="col">Horário simulado</th><th scope="col">UDI</th><th scope="col">Rotação</th><th scope="col">Desgaste</th><th scope="col">Score</th><th scope="col">Indicação</th></tr></thead>
+      <tbody id="history"></tbody>
+    </table></div>
+  </section>
+  <footer>O score descreve a classificação das condições recebidas. O histórico é reiniciado ao recarregar a página.</footer>
+</main>
+</body>
+</html>
